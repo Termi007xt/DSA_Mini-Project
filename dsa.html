@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet');
+        body {
+            font-family: 'Black Ops One', monospace;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.5s, color 0.5s;
+            overflow-x: hidden;
+        }
+        header {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 20px;
+            cursor: pointer;
+        }
+        header:hover {
+            color: #6495ED;
+        }
+        #toggle-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+        #toggle-btn {
+            cursor: pointer;
+            z-index: 3;
+        }
+        #toggle-btn::before {
+            content: '\1F31E';
+            font-size: 24px;
+            margin-right: 5px;
+        }
+        #toggle-info {
+            font-size: 18px;
+        }
+        body.light-mode {
+            background-color: #f5f5dc;
+            color: #000;
+        }
+        body.dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+        body.dark-mode #toggle-btn::before {
+            content: '\1F319';
+        }
+        #menu-icon {
+            display: inline-block;
+            cursor: pointer;
+            width: 30px; /* Width of the menu icon */
+            height: 25px; /* Total height of the menu icon including spaces */
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2;
+        }
+
+        #menu-icon::before, #menu-icon::after, #menu-icon div {
+            background-color: #000; /* Color of the lines */
+            content: "";
+            display: block;
+            height: 5px; /* Height of each line */
+            margin: 5px 0; /* Space between lines */
+            transition: all 0.3s ease-in-out;
+        }
+
+        #menu-icon div {
+            background-color: #000; /* Ensures the middle line has the same style */
+        }
+
+        #current-sgpa {
+            font-size: 28px;
+        }
+        #popup-menu {
+            position: fixed;
+            top: 60px;
+            left: -300px;
+            width: 250px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(200px);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            z-index: 1;
+            overflow-y: auto;
+            transition: left 0.3s ease;
+        }
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 2;
+        }
+        .gpa-output, .goal-output {
+            margin-top: 20px;
+            background-color: #fff;
+            color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: auto;
+            border-radius: 5px;
+        }
+        #gpa-result, .goal-message {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        body.dark-mode .gpa-output, body.dark-mode .goal-output {
+            background-color: #333;
+            color: #fff;
+        }
+        .menu-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            cursor: pointer;
+        }
+        .calculator-content, .profile-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .calculator-input, .profile-input, .goal-input {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .calculator-input input, .profile-input input, .goal-input input {
+            margin: 5px 0;
+            padding: 10px;
+            width: 80%;
+        }
+        .calculator-btn, .profile-btn, .goal-btn {
+            background-color: #6495ED;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .calculator-btn:hover, .profile-btn:hover, .goal-btn:hover {
+            background-color: #4169E1;
+        }
+        .subject-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        .subject-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            padding: 8px;
+        }
+        .subject-list-item button {
+            background-color: #DC143C;
+            color: #fff;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .subject-list-item button:hover {
+            background-color: #8B0000;
+        }
+        #profile-image-container {
+            position: fixed;
+            top: 20px;
+            right: 120px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+        #profile-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #6495ED;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #profile-btn:hover {
+            background-color: #4169E1;
+        }
+        #profile-customization-content input, .goal-input input[type="number"] {
+            margin-top: 10px;
+            padding: 10px;
+            width: calc(100% - 20px);
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        #save-profile, .goal-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #6495ED;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #save-profile:hover, .goal-btn:hover {
+            background-color: #4169E1;
+        }
+        .goal-message {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .congrats {
+            color: green;
+        }
+        .work-harder {
+            color: red;
+        }
+        .encouragement {
+            color: blue;
+        }
+        .goal-slider, .slider-scale {
+            display: none; /* Hide original slider and scale */
+        }
+        /* New custom slider scale */
+        .custom-slider-scale {
+            position: relative;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, red 0%, yellow 50%, green 100%);
+            margin-top: 20px;
+        }
+        /* Scale numbers */
+        .slider-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+        .slider-scale span {
+            font-size: 12px;
+        }
+        /* Arrow markers */
+        .arrow-marker {
+            position: absolute;
+            top: -10px; /* Adjusted to position arrows above the scale */
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        .current-sgpa-arrow {
+            border-color: rgba(136, 183, 213, 0);
+            border-bottom-color: blue;
+            border-width: 10px;
+            margin-left: -10px;
+        }
+        .goal-sgpa-arrow {
+            border-color: rgba(255, 255, 255, 0);
+            border-bottom-color: black;
+            border-width: 10px;
+            margin-left: -10px;
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <header onclick="goToHomePage()">Student Dashboard</header>
+
+    <div id="profile-image-container" style="background-image: url('path-to-your-image.jpg');"></div>
+    <button id="profile-btn" onclick="showContent('profile-customization')">Profile</button>
+
+    <div id="gpa-content" class="content">
+        <div class="calculator-content">
+            <div class="calculator-input">
+                <input type="text" id="subjectName" placeholder="Subject Name">
+                <input type="number" id="marks" placeholder="Marks Obtained">
+                <input type="number" id="credits" placeholder="Credit Worth">
+                <button class="calculator-btn" onclick="addSubject()">+</button>
+            </div>
+            <ul id="subjectList" class="subject-list"></ul>
+            <button class="calculator-btn" onclick="calculateSGPA()">Calculate</button>
+        </div>
+        <div id="gpa-output" class="gpa-output">
+            <strong>GPA Result:</strong> <span id="gpa-result">-</span>
+        </div>
+    </div>
+
+    <div id="attendance-content" class="content">
+        <h2>Attendance Content</h2>
+        <p>This is the content for Attendance Tracker.</p>
+    </div>
+
+    <div id="timetable-content" class="content">
+        <h2>Timetable Content</h2>
+        <p>This is the content for Interactive Timetable.</p>
+    </div>
+
+    <div id="calendar-content" class="content">
+        <h2>Calendar Content</h2>
+        <p>This is the content for College Exclusive Event Calendar.</p>
+    </div>
+
+    <div id="assignments-content" class="content">
+        <h2>Assignments Content</h2>
+        <p>This is the content for Assignment Tracker.</p>
+    </div>
+
+    <div id="todo-content" class="content">
+        <h2>Todo Content</h2>
+        <p>This is the content for To-Do List.</p>
+    </div>
+
+    <div id="profile-customization-content" class="content">
+        <h2>Profile Customization</h2>
+        <div class="profile-input">
+            <input type="text" placeholder="Enter your name" id="profile-name">
+            <input type="text" placeholder="Enter your USN" id="profile-usn">
+        </div>
+        <div class="goal-setting">
+            <h3>Set Your Goal</h3>
+            <div class="goal-input">
+                <input type="number" id="goal-sgpa" placeholder="Goal SGPA" min="0" max="10" step="0.1">
+                <input type="number" id="goal-cgpa" placeholder="Goal CGPA" min="0" max="10" step="0.1">
+            </div>
+            <button class="goal-btn" onclick="compareGoal()">Set Goal</button>
+            <div class="goal-output">
+                <p>Current SGPA: <span id="current-sgpa">-</span></p>
+                <div class="goal-message" id="goal-message"></div>
+                <div class="custom-slider-scale" id="custom-slider-scale">
+                    <div class="arrow-marker current-sgpa-arrow" style="left: 50%;"></div> <!-- Placeholder for dynamic positioning -->
+                    <div class="arrow-marker goal-sgpa-arrow" style="left: 75%;"></div> <!-- Placeholder for dynamic positioning -->
+                </div>
+                <div class="slider-scale">
+                    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                    <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                </div>
+            </div>
+        </div>
+        <button id="save-profile">Save</button>
+    </div>
+
+    <div id="toggle-container">
+        <div id="toggle-btn" onclick="toggleMode()"></div>
+        <div id="toggle-info">Day grind</div>
+    </div>
+
+    <div id="menu-icon" onclick="toggleMenu()">
+        <div></div> <!-- This div is used to create the middle line -->
+    </div>
+
+    <div id="popup-menu">
+        <div class="menu-item" onclick="showContent('gpa')">GPA Calculator</div>
+        <div class="menu-item" onclick="showContent('attendance')">Attendance Tracker</div>
+        <div class="menu-item" onclick="showContent('timetable')">Interactive Timetable</div>
+        <div class="menu-item" onclick="showContent('calendar')">College Exclusive Event Calendar</div>
+        <div class="menu-item" onclick="showContent('assignments')">Assignment Tracker</div>
+        <div class="menu-item" onclick="showContent('todo')">To-Do List</div>
+    </div>
+
+    <script>
+        let subjects = [];
+        let currentSGPA = 0;
+
+        function toggleMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function toggleMenu() {
+            const popupMenu = document.getElementById('popup-menu');
+            if (popupMenu.style.left === '0px') {
+                popupMenu.style.left = '-300px';
+            } else {
+                popupMenu.style.left = '0px';
+            }
+        }
+
+        function showContent(contentId) {
+            const allContent = document.querySelectorAll('.content');
+            allContent.forEach(content => {
+                content.style.display = 'none';
+            });
+
+            const selectedContent = document.getElementById(`${contentId}-content`);
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+        }
+
+        function goToHomePage() {
+            const allContent = document.querySelectorAll('.content');
+            allContent.forEach(content => {
+                content.style.display = 'none';
+            });
+        }
+
+        function addSubject() {
+            const subjectName = document.getElementById('subjectName').value;
+            const marks = parseFloat(document.getElementById('marks').value);
+            const credits = parseInt(document.getElementById('credits').value);
+
+            if (subjectName && !isNaN(marks) && !isNaN(credits)) {
+                subjects.push({
+                    name: subjectName,
+                    marks: marks,
+                    credits: credits
+                });
+                updateSubjectList();
+                document.getElementById('subjectName').value = '';
+                document.getElementById('marks').value = '';
+                document.getElementById('credits').value = '';
+            } else {
+                alert('Please enter valid values for all fields.');
+            }
+        }
+
+        function deleteSubject(index) {
+            subjects.splice(index, 1);
+            updateSubjectList();
+        }
+
+        function updateSubjectList() {
+            const subjectList = document.getElementById('subjectList');
+            subjectList.innerHTML = '';
+            subjects.forEach((subject, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'subject-list-item';
+                listItem.innerHTML = `${subject.name} - Marks: ${subject.marks}, Credits: ${subject.credits} <button onclick='deleteSubject(${index})' class='calculator-btn'>-</button>`;
+                subjectList.appendChild(listItem);
+            });
+        }
+
+        function calculateSGPA() {
+            if (subjects.length === 0) {
+                alert('Please add subjects before calculating SGPA.');
+                return;
+            }
+
+            let totalCredits = 0;
+            let weightedSum = 0;
+
+            subjects.forEach(subject => {
+                const gradePoint = marksToGradePoint(subject.marks);
+                weightedSum += gradePoint * subject.credits;
+                totalCredits += subject.credits;
+            });
+
+            const sgpa = weightedSum / totalCredits;
+            currentSGPA = sgpa; // Update current SGPA
+            document.getElementById('gpa-output').style.display = 'block';
+            document.getElementById('gpa-result').textContent = `SGPA: ${sgpa.toFixed(2)}`;
+            document.getElementById('current-sgpa').textContent = sgpa.toFixed(2); // Update SGPA in profile section
+            // Update arrow positions dynamically based on SGPA
+            updateArrowPositions(currentSGPA, parseFloat(document.getElementById('goal-sgpa').value));
+        }
+
+        function marksToGradePoint(marks) {
+            if (marks >= 90) return 10;
+            if (marks >= 80) return 9;
+            if (marks >= 70) return 8;
+            if (marks >= 60) return 7;
+            if (marks >= 50) return 6;
+            if (marks >= 40) return 5;
+            if (marks >= 30) return 4;
+            if (marks >= 20) return 3;
+            if (marks >= 10) return 2;
+            return 0;
+        }
+
+        function compareGoal() {
+            const goalSGPA = parseFloat(document.getElementById('goal-sgpa').value);
+            const goalMessage = document.getElementById('goal-message');
+
+            if (currentSGPA > goalSGPA) {
+                goalMessage.textContent = 'Congratulations! You have surpassed your goal!';
+                goalMessage.className = 'goal-message congrats';
+            } else if (currentSGPA < goalSGPA) {
+                goalMessage.textContent = 'You need to work harder to reach your goal.';
+                goalMessage.className = 'goal-message work-harder';
+            } else {
+                goalMessage.textContent = 'Great job! You have met your goal. Keep pushing forward!';
+                goalMessage.className = 'goal-message encouragement';
+            }
+            // Update arrow positions dynamically based on SGPA
+            updateArrowPositions(currentSGPA, goalSGPA);
+        }
+
+        function updateArrowPositions(currentSGPA, goalSGPA) {
+            const scaleWidth = document.querySelector('.custom-slider-scale').offsetWidth;
+            const currentSGPAPosition = (currentSGPA / 10) * scaleWidth;
+            const goalSGPAPosition = (goalSGPA / 10) * scaleWidth;
+
+            document.querySelector('.current-sgpa-arrow').style.left = `${currentSGPAPosition}px`;
+            document.querySelector('.goal-sgpa-arrow').style.left = `${goalSGPAPosition}px`;
+        }
+    </script>
+</body>
+</html>
