@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Black Ops One', monospace;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.5s, color 0.5s;
+            overflow-x: hidden;
+            background-color: #f5f5dc;
+            color: #000;
+        }
+        header {
+            text-align: center;
+            font-size: 50px;
+            font-weight: bold;
+            margin: 20px 0;
+            cursor: default; /* Change to default to avoid the cursor pointer on the entire header */
+        }
+        header p {
+            text-align: center;
+            font-size: 16px;
+        }
+        #header-text {
+            cursor: pointer;
+            display: inline; /* Use inline or inline-block for the clickable span */
+        }
+        #header-text:hover {
+            color: #6495ED; /* Ensures the hover effect is applied only to the text */
+        }
+        .feature-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between; /* Updated to space-between */
+            padding: 20px;
+        }
+
+        .card {
+            width: calc(45% - 20px); /* Adjust the width based on your preference */
+            margin-bottom: 20px; /* Adjust margin-bottom for spacing between rows */
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            position: fixed;
+            bottom: -60px; /* Set to the height of the footer */
+            left: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            text-align: center;
+            padding: 10px;
+            transition: bottom 0.3s; /* Add smooth transition effect */
+        }
+        
+        #toggle-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        #toggle-btn {
+            cursor: pointer;
+            z-index: 3;
+            font-size: 24px;
+        }
+        #toggle-btn::before {
+            content: '\1F31E';
+            font-size: 32px;
+            margin-right: 5px;
+        }
+        #toggle-info {
+            font-size: 18px;
+        }
+        body.light-mode {
+            background-color: #f5f5dc;
+            color: #000;
+        }
+        body.dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+        body.dark-mode #toggle-btn::before {
+            content: '\1F319';
+        }
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 2;
+        }
+        .gpa-output, .goal-output {
+            margin-top: 20px;
+            background-color: #fff;
+            color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: auto;
+            border-radius: 5px;
+        }
+        #gpa-result, .goal-message {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        body.dark-mode .gpa-output, body.dark-mode .goal-output {
+            background-color: #333;
+            color: #fff;
+        }
+        .calculator-content, .profile-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .calculator-input, .profile-input, .goal-input {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .calculator-input input, .profile-input input, .goal-input input {
+            margin: 5px 0;
+            padding: 10px;
+            width: 80%;
+        }
+        .calculator-btn, .profile-btn, .goal-btn {
+            background-color: #6495ED;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .calculator-btn:hover, .profile-btn:hover, .goal-btn:hover {
+            background-color: #4169E1;
+        }
+        .subject-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        .subject-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            padding: 8px;
+        }
+        .subject-list-item button {
+            background-color: #DC143C;
+            color: #fff;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .subject-list-item button:hover {
+            background-color: #8B0000;
+        }
+        #profile-image-container {
+            position: fixed;
+            top: 20px;
+            right: 120px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+        #profile-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #6495ED;
+            color: #fff;
+            padding: 16px 32px;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: 'Black Ops One', monospace;
+        }
+        #profile-btn span {
+            font-family: 'Black Ops One', monospace; /* Set the desired font family */
+            font-size: inherit; /* Inherit the font size from the parent (button) */
+        }
+
+        #profile-btn:hover {
+            background-color: #4169E1;
+        }
+        #profile-customization-content input, .goal-input input[type="number"] {
+            margin-top: 10px;
+            padding: 10px;
+            width: calc(100% - 20px);
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        #save-profile, .goal-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #6495ED;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #save-profile:hover, .goal-btn:hover {
+            background-color: #4169E1;
+        }
+        .goal-message {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .congrats {
+            color: green;
+        }
+        .work-harder {
+            color: red;
+        }
+        .encouragement {
+            color: blue;
+        }
+        .goal-slider, .slider-scale {
+            display: none; /* Hide original slider and scale */
+        }
+        /* New custom slider scale */
+        .custom-slider-scale {
+            position: relative;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, red 0%, yellow 50%, green 100%);
+            margin-top: 20px;
+        }
+        /* Scale numbers */
+        .slider-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+        .slider-scale span {
+            font-size: 12px;
+        }
+        /* Arrow markers */
+        .arrow-marker {
+            position: absolute;
+            top: -10px; /* Adjusted to position arrows above the scale */
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        .current-sgpa-arrow {
+            border-color: rgba(136, 183, 213, 0);
+            border-bottom-color: blue;
+            border-width: 10px;
+            margin-left: -10px;
+        }
+        .goal-sgpa-arrow {
+            border-color: rgba(255, 255, 255, 0);
+            border-bottom-color: black;
+            border-width: 10px;
+            margin-left: -10px;
+        }
+        .show-footer {
+            bottom: 0;
+        }
+        .back-arrow {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #000; /* Ensure text color is black in light mode */
+            border: 1px solid transparent; /* Optional: adds a border */
+        }
+
+        .back-arrow:hover {
+            background-color: #ddd;
+        }
+
+        body.dark-mode .back-arrow {
+        background-color: #333; /* Dark background for dark mode */
+        color: #fff; /* White text color for visibility in dark mode */
+        border-color: #fff; /* Optional: white border for visibility */
+    }
+    </style>
+</head>
+<body class="light-mode">
+    <header>
+        <span id="header-text" onclick="goToHomePage()">Student Dashboard</span>
+        <p>Manage your academic life with ease</p>
+    </header>
+    
+    <div id="profile-image-container" style="background-image: url('path-to-your-image.jpg');"></div>
+    <button id="profile-btn" onclick="showContent('profile-customization')">Profile</button>
+    
+    <!-- Tiles for menu options -->
+    <div class="feature-cards">
+        <div class="card" onclick="showContent('gpa')">
+            <div class="card-icon">&#x1F4DA;</div>
+            <h3>SGPA Calculator</h3>
+            <p>Quickly calculate your semester GPA.</p>
+        </div>
+        <div class="card" onclick="showContent('attendance')">
+            <div class="card-icon">&#x1F4C5;</div>
+            <h3>Attendance Tracker</h3>
+            <p>Keep track of your attendance.</p>
+        </div>
+        <div class="card" onclick="showContent('timetable')">
+            <div class="card-icon">&#x1F550;</div>
+            <h3>Timetable</h3>
+            <p>View your class and exam schedules.</p>
+        </div>
+        <div class="card" onclick="showContent('calendar')">
+            <div class="card-icon">&#x1F4C6;</div>
+            <h3>Event Calendar</h3>
+            <p>Check out college events and important dates.</p>
+        </div>
+        <div class="card" onclick="showContent('assignments')">
+            <div class="card-icon">&#x1F4DD;</div>
+            <h3>Assignments Tracker</h3>
+            <p>Organize your assignments and deadlines.</p>
+        </div>
+        <div class="card" onclick="showContent('todo')">
+            <div class="card-icon">&#x270F;&#xFE0F;</div>
+            <h3>To-Do List</h3>
+            <p>Manage your daily tasks effectively.</p>
+        </div>
+    </div>
+
+    <div id="gpa-content" class="content">
+        <div class="back-arrow" onclick="showHomePage()">&#8592; Back</div>
+        <div class="calculator-content">
+            <div class="calculator-input">
+                <input type="text" id="subjectName" placeholder="Subject Name">
+                <input type="number" id="marks" placeholder="Marks Obtained">
+                <input type="number" id="credits" placeholder="Credit Worth">
+                <button class="calculator-btn" onclick="addSubject()">+</button>
+            </div>
+            <ul id="subjectList" class="subject-list"></ul>
+            <button class="calculator-btn" onclick="calculateSGPA()">Calculate</button>
+        </div>
+        <div id="gpa-output" class="gpa-output">
+            <strong>GPA Result:</strong> <span id="gpa-result">-</span>
+        </div>
+    </div>
+
+    <div id="attendance-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>Attendance Content</h2>
+        <p>This is the content for Attendance Tracker.</p>
+    </div>
+
+    <div id="timetable-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>Timetable Content</h2>
+        <p>This is the content for Interactive Timetable.</p>
+    </div>
+
+    <div id="calendar-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>Calendar Content</h2>
+        <p>This is the content for College Exclusive Event Calendar.</p>
+    </div>
+
+    <div id="assignments-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>Assignments Content</h2>
+        <p>This is the content for Assignment Tracker.</p>
+    </div>
+
+    <div id="todo-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>Todo Content</h2>
+        <p>This is the content for To-Do List.</p>
+    </div>
+
+    <div id="profile-customization-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>Profile Customization</h2>
+        <div class="profile-input">
+            <input type="text" placeholder="Enter your name" id="profile-name">
+            <input type="text" placeholder="Enter your USN" id="profile-usn">
+        </div>
+        <div class="goal-setting">
+            <h3>Set Your Goal</h3>
+            <div class="goal-input">
+                <input type="number" id="goal-sgpa" placeholder="Goal SGPA" min="0" max="10" step="0.1">
+            </div>
+            <button class="goal-btn" onclick="compareGoal()">Set Goal</button>
+            <div class="goal-output">
+                <p>Current SGPA: <span id="current-sgpa">-</span></p>
+                <div class="goal-message" id="goal-message"></div>
+                <div class="custom-slider-scale" id="custom-slider-scale">
+                    <div class="arrow-marker current-sgpa-arrow" style="left: 50%;"></div> <!-- Placeholder for dynamic positioning -->
+                    <div class="arrow-marker goal-sgpa-arrow" style="left: 75%;"></div> <!-- Placeholder for dynamic positioning -->
+                </div>
+                <div class="slider-scale">
+                    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                    <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+    <div id="toggle-container">
+        <div id="toggle-btn" onclick="toggleMode()"></div>
+        <div id="toggle-info">Day grind</div>
+    </div>
+    
+    <div class="footer">
+        <p>Contact Us: <a href="mailto:support@school.edu">support@school.edu</a> | <a href="#">Privacy Policy</a></p>
+        <p>&copy; 2024 Student Dashboard. All rights reserved.</p>
+    </div>
+
+    <div id="footer-container" class="footer">
+        <p>Contact Us: <a href="mailto:support@school.edu">support@school.edu</a> | <a href="#">Privacy Policy</a></p>
+        <p>&copy; 2024 Student Dashboard. All rights reserved.</p>
+    </div>
+    
+    <script>
+        let subjects = [];
+        let currentSGPA = 0;
+
+        function toggleMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            const modeText = body.classList.contains('dark-mode') ? 'Night owl' : 'Day grind';
+            document.getElementById('toggle-info').textContent = modeText;
+        }
+
+        function showContent(contentId) {
+            // Hide the feature-cards div
+            document.querySelector('.feature-cards').style.display = 'none';
+            
+            // Hide all content divs
+            const allContent = document.querySelectorAll('.content');
+            allContent.forEach(content => content.style.display = 'none');
+
+            // Display the specific content div
+            const selectedContent = document.getElementById(`${contentId}-content`);
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+        }
+
+        function showHomePage() {
+            const allContent = document.querySelectorAll('.content');
+            allContent.forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Display the feature cards again
+            document.querySelector('.feature-cards').style.display = 'flex';
+        }
+
+        document.querySelector('header').addEventListener('click', showHomePage);
+
+        function goToHomePage() {
+            const allContent = document.querySelectorAll('.content');
+            allContent.forEach(content => content.style.display = 'none');
+            // Optionally, show the tiles again if they were hidden
+            document.querySelector('.feature-cards').style.display = 'flex';
+        }
+
+        function addSubject() {
+            const subjectName = document.getElementById('subjectName').value;
+            const marks = parseFloat(document.getElementById('marks').value);
+            const credits = parseInt(document.getElementById('credits').value);
+
+            if (subjectName && !isNaN(marks) && !isNaN(credits)) {
+                subjects.push({
+                    name: subjectName,
+                    marks: marks,
+                    credits: credits
+                });
+                updateSubjectList();
+                document.getElementById('subjectName').value = '';
+                document.getElementById('marks').value = '';
+                document.getElementById('credits').value = '';
+            } else {
+                alert('Please enter valid values for all fields.');
+            }
+        }
+
+        function deleteSubject(index) {
+            subjects.splice(index, 1);
+            updateSubjectList();
+        }
+
+        function updateSubjectList() {
+            const subjectList = document.getElementById('subjectList');
+            subjectList.innerHTML = '';
+            subjects.forEach((subject, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'subject-list-item';
+                listItem.innerHTML = `${subject.name} - Marks: ${subject.marks}, Credits: ${subject.credits} <button onclick='deleteSubject(${index})' class='calculator-btn'>-</button>`;
+                subjectList.appendChild(listItem);
+            });
+        }
+
+        function calculateSGPA() {
+            if (subjects.length === 0) {
+                alert('Please add subjects before calculating SGPA.');
+                return;
+            }
+
+            let totalCredits = 0;
+            let weightedSum = 0;
+
+            subjects.forEach(subject => {
+                const gradePoint = marksToGradePoint(subject.marks);
+                weightedSum += gradePoint * subject.credits;
+                totalCredits += subject.credits;
+            });
+
+            const sgpa = weightedSum / totalCredits;
+            currentSGPA = sgpa; // Update current SGPA
+            document.getElementById('gpa-output').style.display = 'block';
+            document.getElementById('gpa-result').textContent = `SGPA: ${sgpa.toFixed(2)}`;
+            document.getElementById('current-sgpa').textContent = sgpa.toFixed(2); // Update SGPA in profile section
+            // Update arrow positions dynamically based on SGPA
+            updateArrowPositions(currentSGPA, parseFloat(document.getElementById('goal-sgpa').value));
+        }
+
+        function marksToGradePoint(marks) {
+            if (marks >= 90) return 10;
+            if (marks >= 80) return 9;
+            if (marks >= 70) return 8;
+            if (marks >= 60) return 7;
+            if (marks >= 50) return 6;
+            if (marks >= 40) return 5;
+            if (marks >= 30) return 4;
+            if (marks >= 20) return 3;
+            if (marks >= 10) return 2;
+            return 0;
+        }
+
+        function compareGoal() {
+            const goalSGPA = parseFloat(document.getElementById('goal-sgpa').value);
+            const goalMessage = document.getElementById('goal-message');
+
+            if (currentSGPA > goalSGPA) {
+                goalMessage.textContent = 'Congratulations! You have surpassed your goal!';
+                goalMessage.className = 'goal-message congrats';
+            } else if (currentSGPA < goalSGPA) {
+                goalMessage.textContent = 'You need to work harder to reach your goal.';
+                goalMessage.className = 'goal-message work-harder';
+            } else {
+                goalMessage.textContent = 'Great job! You have met your goal. Keep pushing forward!';
+                goalMessage.className = 'goal-message encouragement';
+            }
+            // Update arrow positions dynamically based on SGPA
+            updateArrowPositions(currentSGPA, goalSGPA);
+        }
+
+        function updateArrowPositions(currentSGPA, goalSGPA) {
+            const scaleWidth = document.querySelector('.custom-slider-scale').offsetWidth;
+            const currentSGPAPosition = (currentSGPA / 10) * scaleWidth;
+            const goalSGPAPosition = (goalSGPA / 10) * scaleWidth;
+
+            document.querySelector('.current-sgpa-arrow').style.left = `${currentSGPAPosition}px`;
+            document.querySelector('.goal-sgpa-arrow').style.left = `${goalSGPAPosition}px`;
+        }
+
+        document.addEventListener('scroll', function () {
+            const scrollY = window.scrollY || window.pageYOffset;
+            const bodyHeight = document.body.offsetHeight;
+            const windowHeight = window.innerHeight;
+            const footer = document.getElementById('footer-container');
+
+            // Adjust the value based on your preference
+            const scrollThreshold = 100;
+
+            if (scrollY + windowHeight >= bodyHeight - scrollThreshold) {
+                footer.classList.add('show-footer');
+            } else {
+                footer.classList.remove('show-footer');
+            }
+        });
+
+    </script>
+</body>
+</html>
