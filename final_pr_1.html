@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Black Ops One', monospace;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.5s, color 0.5s;
+            overflow-x: hidden;
+            background-color: #f5f5dc;
+            color: #000;
+        }
+        header {
+            text-align: center;
+            font-size: 50px;
+            font-weight: bold;
+            margin: 20px 0;
+            cursor: default; /* Change to default to avoid the cursor pointer on the entire header */
+        }
+        header p {
+            text-align: center;
+            font-size: 16px;
+        }
+        #header-text {
+            cursor: pointer;
+            display: inline; /* Use inline or inline-block for the clickable span */
+        }
+        #header-text:hover {
+            color: #6495ED; /* Ensures the hover effect is applied only to the text */
+        }
+        .feature-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between; /* Updated to space-between */
+            padding: 100px;
+        }
+
+        .card {
+            width: calc(45% - 20px); /* Adjust the width based on your preference */
+            margin-bottom: 10px; /* Adjust margin-bottom for spacing between rows */
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            position: fixed;
+            bottom: -60px; /* Set to the height of the footer */
+            left: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            text-align: center;
+            padding: 10px;
+            transition: bottom 0.3s; /* Add smooth transition effect */
+        }
+        
+        #toggle-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        #toggle-btn {
+            cursor: pointer;
+            z-index: 3;
+            font-size: 24px;
+        }
+        #toggle-btn::before {
+            content: '\1F31E';
+            font-size: 32px;
+            margin-right: 5px;
+        }
+        #toggle-info {
+            font-size: 18px;
+        }
+        body.light-mode {
+            background-color: #f5f5dc;
+            color: #000;
+        }
+        body.dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+        body.dark-mode #toggle-btn::before {
+            content: '\1F319';
+        }
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: auto;
+            max-width: none;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 2;
+            margin: 20px;
+        }
+        .gpa-output, .goal-output {
+            margin-top: 20px;
+            background-color: #fff;
+            color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 700px;
+            border-radius: 5px;
+        }
+        #gpa-result, .goal-message {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        body.dark-mode .gpa-output, body.dark-mode .goal-output {
+            background-color: #333;
+            color: #fff;
+        }
+        .calculator-content, .profile-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .profile-content, .attendance-goal-setting {
+            display: flex; 
+            justify-content: space-around;
+            align-items: start;
+            flex-wrap: wrap; 
+            width: auto; 
+            margin: 10px;
+        }
+            .calculator-input, .profile-input, .goal-input {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .calculator-input input, .profile-input input, .goal-input input {
+            margin: 5px 0;
+            padding: 10px;
+            width: 80%;
+        }
+        .calculator-btn, .profile-btn, .goal-btn {
+            background-color: #6495ED;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .calculator-btn:hover, .profile-btn:hover, .goal-btn:hover {
+            background-color: #4169E1;
+        }
+        .subject-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        .subject-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            padding: 8px;
+        }
+        .subject-list-item button {
+            background-color: #DC143C;
+            color: #fff;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .subject-list-item button:hover {
+            background-color: #8B0000;
+        }
+        #profile-image-container {
+            position: fixed;
+            top: 20px;
+            right: 120px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+        #profile-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #6495ED;
+            color: #fff;
+            padding: 16px 32px;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: 'Black Ops One', monospace;
+        }
+        #profile-btn span {
+            font-family: 'Black Ops One', monospace; /* Set the desired font family */
+            font-size: inherit; /* Inherit the font size from the parent (button) */
+        }
+
+        #profile-btn:hover {
+            background-color: #4169E1;
+        }
+        #profile-customization-content input, .goal-input input[type="number"] {
+            display: flex; /* Use flexbox to lay out children side by side */
+            justify-content: space-around; /* Space out children */
+            align-items: start; /* Align items at the start of the container */
+            flex-wrap: wrap; /* Allow items to wrap if not enough space */
+            width: 200px; /* Adjust width as necessary */
+             /* Adjust maximum width as necessary */
+            margin: 10px; /* Center the container */
+        }
+        
+        #save-profile, .goal-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #6495ED;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #save-profile:hover, .goal-btn:hover {
+            background-color: #4169E1;
+        }
+        .goal-message {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .congrats {
+            color: green;
+        }
+        .work-harder {
+            color: red;
+        }
+        .encouragement {
+            color: blue;
+        }
+        .goal-slider, .slider-scale {
+            display: none; /* Hide original slider and scale */
+        }
+        /* New custom slider scale */
+        .custom-slider-scale {
+            position: relative;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, red 0%, yellow 50%, green 100%);
+            margin-top: 20px;
+        }
+        /* Scale numbers */
+        .slider-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+        .slider-scale span {
+            font-size: 12px;
+        }
+        /* Arrow markers */
+        .arrow-marker {
+            position: absolute;
+            top: -10px; /* Adjusted to position arrows above the scale */
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        .current-sgpa-arrow {
+            border-color: rgba(136, 183, 213, 0);
+            border-bottom-color: blue;
+            border-width: 10px;
+            margin-left: -10px;
+        }
+        .goal-sgpa-arrow {
+            border-color: rgba(255, 255, 255, 0);
+            border-bottom-color: black;
+            border-width: 10px;
+            margin-left: -10px;
+        }
+        .show-footer {
+            bottom: 0;
+        }
+        .back-arrow {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #000; /* Ensure text color is black in light mode */
+            border: 1px solid transparent; /* Optional: adds a border */
+        }
+
+        .back-arrow:hover {
+            background-color: #ddd;
+        }
+
+        body.dark-mode .back-arrow {
+        background-color: #333; /* Dark background for dark mode */
+        color: #fff; /* White text color for visibility in dark mode */
+        border-color: #fff; /* Optional: white border for visibility */
+        }
+        .attendance-tracker table {
+            width: 100%;
+            margin: 90px auto;
+            border-collapse: collapse;
+        }
+
+        .attendance-tracker th, .attendance-tracker td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+
+        .attendance-tracker th {
+            background-color: #f2f2f2;
+        }
+
+        .attendance-input {
+            width: 90%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #addRow, #calculateAttendance {
+            background-color: #6495ED;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #addRow:hover, #calculateAttendance:hover {
+            background-color: #4169E1;
+        }
+        body.dark-mode #attendance-content table,
+        body.dark-mode #attendance-content th,
+        body.dark-mode #attendance-content td {
+            background-color: #333; /* Dark background for table */
+            color: #fff; /* Light text for visibility */
+            border: 1px solid #777; /* Adjust border color for visibility in dark mode */
+        }
+
+        body.dark-mode #attendance-content .attendance-input {
+            background-color: #555; /* Darker background for inputs */
+            color: #fff; /* White text for inputs */
+            border: 1px solid #777;
+        }
+
+        body.dark-mode #attendance-content button {
+            background-color: #444; /* Darker background for buttons */
+            color: #ddd; /* Lighter text for buttons */
+        }
+
+        /* Dark Mode Adjustments for Footer */
+        body.dark-mode .footer {
+            background-color: #333; /* Dark background for the footer */
+            color: #ddd; /* Lighter text for visibility in dark mode */
+            /* Apply the same border adjustment as the table if needed */
+            border-top: 1px solid #555; /* Softer border color for dark mode */
+        }
+
+
+        #timetable-content {
+            width: 90%; /* Increase the width of the timetable content */
+            max-width: 1500px; /* Optional: Set a max-width to prevent it from becoming too wide on large screens */
+            margin: 20px auto; /* Center it on the page with some margin */
+            padding: 20px; /* Add padding for spacing around the content */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow for better visual separation */
+            background-color: #ffffff; /* Optional: Change the background color if it's in dark mode or for contrast */
+        }
+
+        #timetable-content h2 {
+            font-size: 24px; /* Increase the font size of the heading for prominence */
+            margin-bottom: 20px; /* Add more space below the heading */
+        }
+
+        .timetable-container {
+            overflow-x: auto; /* Ensures content is scrollable on small screens */
+        }
+
+        table#timetable {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        table#timetable th, table#timetable td {
+            padding: 15px; /* Increase padding for a more spacious look */
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        #addTimeSlot {
+            padding: 12px 25px; /* Increase padding for a larger, more clickable area */
+            margin-top: 20px; /* Add more space above the button */
+            border-radius: 8px; /* Rounded edges for the button */
+            font-family: inherit; /* Inherit the font style from the body or parent element */
+            font-size: inherit; /* Inherit the font size from the body or parent element */
+            cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+        }
+
+        /* Ensure the footer or any other elements adjust accordingly */
+        .footer {
+            margin-top: 40px; /* Add space above the footer to avoid clutter */
+        }
+        
+        /* Dark Mode Adjustments */
+        body.dark-mode #timetable-content table,
+        body.dark-mode #timetable-content th,
+        body.dark-mode #timetable-content td {
+            background-color: #333; /* Same background for consistency */
+            color: #fff; /* White text for visibility */
+            border: 1px solid #555; /* Softer border color for dark mode */
+        }
+
+        body.dark-mode #timetable-content{
+            background-color: #363636;
+
+        }
+
+        /* Ensure the inputs in the table cells do not change the cell size */
+        .timetable-input {
+            background-color: #c7c7c7; /* Light background for light mode */
+            color: #000; /* Dark text for light mode */
+            /* Maintain consistent padding and margin in both modes */
+            padding: 4px;
+            margin: 4px 2px;
+            width: calc(40% - 8px);
+            border: 1px solid #ccc; /* Consistent border color */
+        }
+
+        body.dark-mode .timetable-input {
+            background-color: #555; /* Darker background for inputs in dark mode */
+            color: #fff; /* White text for inputs in dark mode */
+            border: 1px solid #777; /* Softer border color for dark mode */
+        }
+
+        /* Add these styles to maintain the height of the table rows in dark mode */
+        body.dark-mode #timetable-content tr {
+            border: 1px solid #555; /* Softer border color for dark mode */
+        }
+
+        /* Optional: if you want to remove the border for the th */
+        body.dark-mode #timetable-content th {
+            border-bottom: none; /* Remove bottom border for header cells in dark mode if needed */
+        }
+
+        .special-time-slot {
+            width: 50px; /* Set a smaller width for break/lunch columns */
+            vertical-align: middle; /* Center the text vertically */
+            text-align: center; /* Center the text horizontally */
+            white-space: pre-line; /* Allows line breaks in your content */
+        }
+
+        .attendance-increment {
+            background-color: green;
+        }
+
+        .attendance-decrement {
+            background-color: red;
+        }
+        .attendance-btn {
+            padding: 4px 6px;
+            margin-left: 0 2px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            border-radius: 4px;
+        }
+
+        #todo-content {
+            width: 80%; /* Adjust the width as needed */
+            max-width: 1200px; /* Adjust the max-width as needed */
+            height: auto; /* Let the height adjust based on content, or set a specific height */
+            padding: 40px; /* Increase padding for more internal space */
+            margin-top: 20px; /* Ensure there's space above it, adjust as needed */
+            overflow-y: auto; /* Add scroll for overflow */
+        }
+
+        #addTaskBtn, .add-task-btn, .complete-btn {
+            padding: 15px 25px; /* Larger padding for a bigger button */
+            font-size: 18px; /* Larger font size */
+            background-color: rgb(65, 206, 241); /* Consistent color for all buttons */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 2px; /* Space between add button and task list */
+        }
+
+        .task-input-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 80%; /* Or as big as the task boxes */
+            margin: 10px 0;
+        }
+
+        .task-input {
+            flex-grow: 1; /* Input field grows to take available space */
+            padding: 15px; /* Larger padding */
+            margin-right: 10px; /* Space between input and button */
+            font-size: 18px; /* Larger font size */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        #tasksContainer {
+            width: 100%; /* Match width with task input container */
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center tasks in the container */
+        }
+
+        .task-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 10px;
+            justify-content: center; /* Center align the task and button */
+        }
+        .task {
+            padding: 15px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: calc(100% - 160px); /* Subtract width of button and margin */
+            text-align: center;
+            margin-right: 10px;
+            box-sizing: border-box; /* Include padding and border in the width */
+        }
+
+        @keyframes colorChange {
+            to {
+                background-color: rgb(0, 189, 25); /* Target color */
+            }
+        }
+
+        .complete-btn {
+            padding: 15px 25px;
+            font-size: 18px;
+            background-color: rgb(65, 206, 241);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 2s linear; /* Transition effect for background color change */
+            /* No need for the ::after pseudo-element and its related styles */
+        }
+        .complete-btn.active {
+            background-color: rgb(0, 189, 25); /* Change to green when active */
+        }
+
+
+        
+        body.dark-mode .task {
+            background-color: #333; /* Dark mode background color for tasks */
+            color: #fff; /* Dark mode text color for tasks */
+        }
+
+
+
+    </style>
+</head>
+<body class="light-mode">
+    <header>
+        <span id="header-text" onclick="goToHomePage()">Student Dashboard</span>
+        <p>Manage your academic life with ease</p>
+    </header>
+    
+    <div id="profile-image-container" style="background-image: url('path-to-your-image.jpg');"></div>
+    <button id="profile-btn" onclick="showContent('profile-customization')">Profile</button>
+    
+    <!-- Tiles for menu options -->
+    <div class="feature-cards">
+        <div class="card" onclick="showContent('gpa')">
+            <div class="card-icon">&#x1F4DA;</div>
+            <h3>SGPA Calculator</h3>
+            <p>Quickly calculate your semester GPA.</p>
+        </div>
+        <div class="card" onclick="showContent('attendance')">
+            <div class="card-icon">&#x1F4C5;</div>
+            <h3>Attendance Tracker</h3>
+            <p>Keep track of your attendance.</p>
+        </div>
+        <div class="card" onclick="showContent('timetable')">
+            <div class="card-icon">&#x1F550;</div>
+            <h3>Timetable</h3>
+            <p>View your class and exam schedules.</p>
+        </div>
+        <div class="card" onclick="showContent('todo')">
+            <div class="card-icon">&#x270F;&#xFE0F;</div>
+            <h3>To-Do List</h3>
+            <p>Manage your daily tasks effectively.</p>
+        </div>
+    </div>
+
+    <div id="gpa-content" class="content">
+        <div class="back-arrow" onclick="showHomePage()">&#8592; Back</div>
+        <div class="calculator-content">
+            <div class="calculator-input">
+                <input type="text" id="subjectName" placeholder="Subject Name">
+                <input type="number" id="marks" placeholder="Marks Obtained">
+                <input type="number" id="credits" placeholder="Credit Worth">
+                <button class="calculator-btn" onclick="addSubject()">+</button>
+            </div>
+            <ul id="subjectList" class="subject-list"></ul>
+            <button class="calculator-btn" onclick="calculateSGPA()">Calculate</button>
+        </div>
+        <div id="gpa-output" class="gpa-output">
+            <strong>GPA Result:</strong> <span id="gpa-result">-</span>
+        </div>
+    </div>
+
+    <div id="attendance-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>Attendance Tracker</h2>
+        <div class="attendance-tracker">
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Subject Name</th>
+                        <th>Subject Code</th>
+                        <th>Classes Held</th>
+                        <th>Classes Attended</th>
+                        <th>Minimum %</th>
+                        <th>Attendance %</th>
+                        <th>Status</th>
+                        <th>R</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="attendance-input" placeholder="Subject Name"></td>
+                        <td><input type="text" class="attendance-input" placeholder="Subject Code"></td>
+                        <td><input type="number" class="attendance-input" placeholder="Classes Held"></td>
+                        <td><input type="number" class="attendance-input" placeholder="Classes Attended"></td>
+                        <td><input type="number" class="attendance-input" placeholder="Minimum %"></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button id="addRow" onclick="addAttendanceRow()">+</button>
+            <button id="calculateAttendance" onclick="calculateAttendance()">Calculate</button>
+        </div>
+    </div>
+    
+
+    <div id="timetable-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <div class="timetable-container">
+            <table id="timetable">
+                <thead>
+                    <tr>
+                        <th>Day / Time</th>
+                        <!-- Columns for time slots will be added dynamically -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Monday</td></tr>
+                    <tr><td>Tuesday</td></tr>
+                    <tr><td>Wednesday</td></tr>
+                    <tr><td>Thursday</td></tr>
+                    <tr><td>Friday</td></tr>
+                    <tr><td>Saturday</td></tr>
+                </tbody>
+            </table>
+            <input type="text" id="newTimeSlot" placeholder="Enter time">
+            <button id="addTimeSlot" onclick="addTimeSlot()">Add Time Slot</button>    
+        </div>
+    </div>
+    
+    
+    <div id="todo-content" class="content">
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>To-Do List</h2>
+        <button id="addTaskBtn">+</button>
+        <div id="tasksContainer"></div>
+    </div>
+    
+
+
+    <div id="profile-customization-content" class="content">
+        <div class="attendance-goal-setting">
+            <h3>Set Minimum Attendance %</h3>
+            <div class="attendance-goal-input">
+                <input type="number" id="attendance-goal" placeholder="Minimum Attendance %" min="0" max="100" step="1">
+                <button class="goal-btn" onclick="setAttendanceGoal()">Set</button>
+            </div>
+            <div class="attendance-goal-output">
+                <p>Current Attendance: <span id="current-attendance">-</span>%</p>
+                <div class="attendance-message" id="attendance-message"></div>
+            </div>
+        </div>
+        
+        <div class="back-arrow" onclick="goToHomePage()">Back</div>
+        <h2>Profile Customization</h2>
+        <div class="profile-input">
+            <input type="text" placeholder="Enter your name" id="profile-name">
+            <input type="text" placeholder="Enter your USN" id="profile-usn">
+        </div>
+        <div class="goal-setting">
+            <h3>Set Your Goal</h3>
+            <div class="goal-input">
+                <input type="number" id="goal-sgpa" placeholder="Goal SGPA" min="0" max="10" step="0.1">
+            </div>
+            <button class="goal-btn" onclick="compareGoal()">Set Goal</button>
+            <div class="goal-output">
+                <p>Current SGPA: <span id="current-sgpa">-</span></p>
+                <div class="goal-message" id="goal-message"></div>
+                <div class="custom-slider-scale" id="custom-slider-scale">
+                    <div class="arrow-marker current-sgpa-arrow" style="left: 50%;"></div> <!-- Placeholder for dynamic positioning -->
+                    <div class="arrow-marker goal-sgpa-arrow" style="left: 75%;"></div> <!-- Placeholder for dynamic positioning -->
+                </div>
+                <div class="slider-scale">
+                    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                    <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+    
+    
+
+    <div id="toggle-container">
+        <div id="toggle-btn" onclick="toggleMode()"></div>
+        <div id="toggle-info">Day grind</div>
+    </div>
+    
+    <div class="footer">
+        <p>Contact Us: <a href="mailto:support@school.edu">support@school.edu</a> | <a href="#">Privacy Policy</a></p>
+        <p>&copy; 2024 Student Dashboard. All rights reserved.</p>
+    </div>
+
+    <div id="footer-container" class="footer">
+        <p>Contact Us: <a href="mailto:support@school.edu">support@school.edu</a> | <a href="#">Privacy Policy</a></p>
+        <p>&copy; 2024 Student Dashboard. All rights reserved.</p>
+    </div>
+    
+    <script>
+        let subjects = [];
+        let currentSGPA = 0;
+
+        function toggleMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            const modeText = body.classList.contains('dark-mode') ? 'Night owl' : 'Day grind';
+            document.getElementById('toggle-info').textContent = modeText;
+        }
+
+        function showContent(contentId) {
+            // Hide the feature-cards div
+            document.querySelector('.feature-cards').style.display = 'none';
+            
+            // Hide all content divs
+            const allContent = document.querySelectorAll('.content');
+            allContent.forEach(content => content.style.display = 'none');
+
+            // Display the specific content div
+            const selectedContent = document.getElementById(`${contentId}-content`);
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+        }
+
+
+        function showHomePage() {
+            const allContent = document.querySelectorAll('.content');
+            allContent.forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Display the feature cards again
+            document.querySelector('.feature-cards').style.display = 'flex';
+        }        
+
+        function goToHomePage() {
+            const allContent = document.querySelectorAll('.content');
+            allContent.forEach(content => content.style.display = 'none');
+            // Optionally, show the tiles again if they were hidden
+            document.querySelector('.feature-cards').style.display = 'flex';
+        }
+
+        function addSubject() {
+            const subjectName = document.getElementById('subjectName').value;
+            const marks = parseFloat(document.getElementById('marks').value);
+            const credits = parseInt(document.getElementById('credits').value);
+
+            if (subjectName && !isNaN(marks) && !isNaN(credits)) {
+                subjects.push({ 
+                    name: subjectName,
+                    marks: marks,
+                    credits: credits
+                });
+                updateSubjectList();
+                document.getElementById('subjectName').value = '';
+                document.getElementById('marks').value = '';
+                document.getElementById('credits').value = '';
+            } else {
+                alert('Please enter valid values for all fields.');
+            }
+        }
+
+        function deleteSubject(index) {
+            subjects.splice(index, 1);
+            updateSubjectList();
+        }
+
+        function updateSubjectList() {
+            const subjectList = document.getElementById('subjectList');
+            subjectList.innerHTML = '';
+            subjects.forEach((subject, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'subject-list-item';
+                listItem.innerHTML = `${subject.name} - Marks: ${subject.marks}, Credits: ${subject.credits} <button onclick='deleteSubject(${index})' class='calculator-btn'>-</button>`;
+                subjectList.appendChild(listItem);
+            });
+        }
+
+        function calculateSGPA() {
+            if (subjects.length === 0) {
+                alert('Please add subjects before calculating SGPA.');
+                return;
+            }
+
+            let totalCredits = 0;
+            let weightedSum = 0;
+
+            subjects.forEach(subject => {
+                const gradePoint = marksToGradePoint(subject.marks);
+                weightedSum += gradePoint * subject.credits;
+                totalCredits += subject.credits;
+            });
+
+            const sgpa = weightedSum / totalCredits;
+            currentSGPA = sgpa; // Update current SGPA
+            document.getElementById('gpa-output').style.display = 'block';
+            document.getElementById('gpa-result').textContent = `SGPA: ${sgpa.toFixed(2)}`;
+            document.getElementById('current-sgpa').textContent = sgpa.toFixed(2); // Update SGPA in profile section
+            // Update arrow positions dynamically based on SGPA
+            updateArrowPositions(currentSGPA, parseFloat(document.getElementById('goal-sgpa').value));
+        }
+
+        function marksToGradePoint(marks) {
+            if (marks >= 90) return 10;
+            if (marks >= 80) return 9;
+            if (marks >= 70) return 8;
+            if (marks >= 60) return 7;
+            if (marks >= 50) return 6;
+            if (marks >= 40) return 5;
+            if (marks >= 30) return 4;
+            if (marks >= 20) return 3;
+            if (marks >= 10) return 2;
+            return 0;
+        }
+
+        function compareGoal() {
+            const goalSGPA = parseFloat(document.getElementById('goal-sgpa').value);
+            const goalMessage = document.getElementById('goal-message');
+
+            if (currentSGPA > goalSGPA) {
+                goalMessage.textContent = 'Congratulations! You have surpassed your goal!';
+                goalMessage.className = 'goal-message congrats';
+            } else if (currentSGPA < goalSGPA) {
+                goalMessage.textContent = 'You need to work harder to reach your goal.';
+                goalMessage.className = 'goal-message work-harder';
+            } else {
+                goalMessage.textContent = 'Great job! You have met your goal. Keep pushing forward!';
+                goalMessage.className = 'goal-message encouragement';
+            }
+            // Update arrow positions dynamically based on SGPA
+            updateArrowPositions(currentSGPA, goalSGPA);
+        }
+
+        function updateArrowPositions(currentSGPA, goalSGPA) {
+            const scaleWidth = document.querySelector('.custom-slider-scale').offsetWidth;
+            const currentSGPAPosition = (currentSGPA / 10) * scaleWidth;
+            const goalSGPAPosition = (goalSGPA / 10) * scaleWidth;
+
+            document.querySelector('.current-sgpa-arrow').style.left = `${currentSGPAPosition}px`;
+            document.querySelector('.goal-sgpa-arrow').style.left = `${goalSGPAPosition}px`;
+        }
+
+        document.addEventListener('scroll', function () {
+            const scrollY = window.scrollY || window.pageYOffset;
+            const bodyHeight = document.body.offsetHeight;
+            const windowHeight = window.innerHeight;
+            const footer = document.getElementById('footer-container');
+
+            // Adjust the value based on your preference
+            const scrollThreshold = 100;
+
+            if (scrollY + windowHeight >= bodyHeight - scrollThreshold) {
+                footer.classList.add('show-footer');
+            } else {
+                footer.classList.remove('show-footer');
+            }
+        });
+
+        function addAttendanceRow() {
+            const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow(table.rows.length);
+
+            // Loop through the first 5 inputs as before
+            for (let i = 0; i < 5; i++) {
+                const cell = newRow.insertCell(i);
+                const input = document.createElement('input');
+                input.className = 'attendance-input';
+                input.type = i < 2 ? 'text' : 'number'; // The first two inputs are text, the next three are numbers
+                cell.appendChild(input);
+            }
+
+            // Add empty cells for Attendance % and Status, as before
+            const attendancePercentageCell = newRow.insertCell(5);
+            attendancePercentageCell.innerHTML = ''; // Attendance %
+
+            const statusCell = newRow.insertCell(6);
+            statusCell.innerHTML = ''; // Status
+
+            // Add the new "R" column for the remove button
+            const removeCell = newRow.insertCell(7); // Adjusting the index for the new "R" column
+            if (table.rows.length > 1) { // Add "-" button only from the second row onwards
+                const removeButton = document.createElement('button');
+                removeButton.textContent = '-';
+                removeButton.style.backgroundColor = 'red';
+                removeButton.style.color = 'white';
+                removeButton.className = 'attendance-btn'; // Add any required classes for styling
+                removeButton.onclick = function() {
+                    // Logic to remove the row on button click
+                    const row = this.parentNode.parentNode;
+                    row.parentNode.removeChild(row);
+                };
+                removeCell.appendChild(removeButton);
+            } else {
+                // For the first row, the "R" column remains empty
+                removeCell.innerHTML = '';
+            }
+        }
+
+
+
+        function calculateAttendance() {
+            const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
+            for (let i = 0; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                const classesHeld = parseInt(row.cells[2].getElementsByTagName('input')[0].value);
+                const classesAttended = parseInt(row.cells[3].getElementsByTagName('input')[0].value);
+                const minPercentage = parseInt(row.cells[4].getElementsByTagName('input')[0].value);
+
+                if (!isNaN(classesHeld) && !isNaN(classesAttended) && !isNaN(minPercentage)) {
+                    const currentPercentage = (classesAttended / classesHeld) * 100;
+                    row.cells[5].innerText = currentPercentage.toFixed(2) + '%';
+
+                    let status = 0;
+                    if (currentPercentage < minPercentage) {
+                        while ((classesAttended + status) / (classesHeld + status) * 100 < minPercentage) {
+                            status++;
+                        }
+                        row.cells[6].innerHTML = '<span style="color: red;">-' + status + '</span>';
+                    } else {
+                        while ((classesAttended - status) / (classesHeld - status) * 100 >= minPercentage && status < classesAttended) {
+                            status++;
+                        }
+                        row.cells[6].innerHTML = '<span style="color: green;">+' + (status - 1) + '</span>';
+                    }
+                } else {
+                    row.cells[5].innerText = '';
+                    row.cells[6].innerText = '';
+                }
+            }
+        }
+
+        function addTimeSlot() {
+            const timeSlot = document.getElementById('newTimeSlot').value.trim().toLowerCase();
+            if (!timeSlot) {
+                alert('Please enter a time slot.');
+                return; // Exit if no input is given
+            }
+            
+            const headerRow = document.getElementById('timetable').querySelector('thead tr');
+            const tableBody = document.getElementById('timetable').querySelectorAll('tbody tr');
+            const newHeader = document.createElement('th');
+            newHeader.style.position = 'relative';
+
+            // Create and configure the delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'X';
+            deleteButton.style.position = 'absolute';
+            deleteButton.style.right = '5px';
+            deleteButton.style.top = '5px';
+            deleteButton.style.cursor = 'pointer';
+            deleteButton.onclick = function() { deleteTimeSlot(newHeader.cellIndex); };
+
+            // Check if the time slot is 'break' or 'lunch' to create a special column
+            if (timeSlot === 'break' || timeSlot === 'lunch') {
+                newHeader.classList.add('special-time-slot'); // Add class for styling
+                newHeader.textContent = timeSlot.toUpperCase().split('').join('\n'); 
+                newHeader.appendChild(deleteButton); // Append delete button for special slots
+                headerRow.appendChild(newHeader);
+
+                // Add a new empty cell in each row of the tbody for the break/lunch column
+                tableBody.forEach(row => {
+                    const newCell = row.insertCell();
+                    newCell.classList.add('special-time-slot'); // Add class for styling
+                });
+            } else {
+                // Create a regular time slot column
+                newHeader.textContent = timeSlot;
+                deleteButton.textContent = 'X';
+                deleteButton.onclick = function() { deleteTimeSlot(newHeader.cellIndex); };
+                newHeader.appendChild(deleteButton);
+                headerRow.appendChild(newHeader);
+
+                // Add a new cell with inputs and buttons in each row of the tbody for the new time slot
+                tableBody.forEach(row => {
+                    const newCell = row.insertCell();
+                    const inputSubjectDiv = document.createElement('div'); // Wrap inputs in div for layout control
+                    const inputCodeDiv = document.createElement('div'); // Separate div for Subject Code and "-" button
+
+                    const inputSubject = document.createElement('input');
+                    inputSubject.type = 'text';
+                    inputSubject.placeholder = 'Subject Name';
+                    inputSubject.className = 'timetable-input subject-name';
+                    inputSubjectDiv.appendChild(inputSubject);
+
+                    const plusButton = document.createElement('button');
+                    plusButton.className = 'attendance-btn attendance-increment';
+                    plusButton.textContent = '+';
+                    inputSubjectDiv.appendChild(plusButton);
+
+                    const inputCode = document.createElement('input');
+                    inputCode.type = 'text';
+                    inputCode.placeholder = 'Subject Code';
+                    inputCode.className = 'timetable-input subject-code';
+                    inputCodeDiv.appendChild(inputCode);
+
+                    const minusButton = document.createElement('button');
+                    minusButton.className = 'attendance-btn attendance-decrement';
+                    minusButton.textContent = '-';
+                    inputCodeDiv.appendChild(minusButton);
+
+                    plusButton.addEventListener('click', () => {
+                    const subjectName = inputSubject.value.trim().toLowerCase();
+                    const subjectCode = inputCode.value.trim().toLowerCase();
+                    incrementAttendance(subjectName, subjectCode);
+                });
+
+                minusButton.addEventListener('click', () => {
+                    const subjectName = inputSubject.value.trim().toLowerCase();
+                    const subjectCode = inputCode.value.trim().toLowerCase();
+                    decrementAttendance(subjectName, subjectCode);
+                });
+
+                    // Append both divs to the cell
+                    newCell.appendChild(inputSubjectDiv);
+                    newCell.appendChild(inputCodeDiv);
+                });
+            }
+
+            // Clear the input field for the next entry
+            document.getElementById('newTimeSlot').value = '';
+        }
+
+
+
+        function deleteTimeSlot(index) {
+            // Confirm before deleting
+            if (!confirm('Are you sure you want to delete this time slot?')) return;
+
+            const table = document.getElementById('timetable');
+            // Delete the header cell
+            table.querySelector('thead tr').deleteCell(index);
+            // Delete the corresponding cells from each row in the tbody
+            Array.from(table.querySelector('tbody').rows).forEach(row => {
+                row.deleteCell(index);
+            });
+        }
+
+        function initializeTimetable() {
+            // Example: Add one time slot initially
+            addTimeSlot();
+        }
+
+        // Call initializeTimetable on page load or when the timetable content is shown
+        document.addEventListener('DOMContentLoaded', function() {
+            // This ensures the timetable is populated when the page loads
+            // initializeTimetable(); // Uncomment if you want to initialize the timetable with one slot by default
+        });
+
+        
+        function findAttendanceRow(subjectName, subjectCode) {
+            const rows = document.getElementById('attendanceTable').querySelectorAll('tbody tr');
+            for (const row of rows) {
+                const rowSubjectName = row.cells[0].querySelector('input').value.trim().toLowerCase();
+                const rowSubjectCode = row.cells[1].querySelector('input').value.trim().toLowerCase();
+                if (subjectName === rowSubjectName && subjectCode === rowSubjectCode) {
+                    return row;
+                }
+            }
+            return null;
+        }
+
+        function incrementAttendance(subjectName, subjectCode) {
+            const row = findAttendanceRow(subjectName, subjectCode);
+            if (row) {
+                const confirmation = confirm(`Attend 1 class for ${subjectName} - ${subjectCode}?`);
+                if (confirmation) {
+                    const classesHeldInput = row.cells[2].querySelector('input');
+                    const classesAttendedInput = row.cells[3].querySelector('input');
+                    classesHeldInput.value = parseInt(classesHeldInput.value || '0') + 1;
+                    classesAttendedInput.value = parseInt(classesAttendedInput.value || '0') + 1;
+                    calculateAttendance(); // Recalculate attendance
+                }
+            } else {
+                alert("This subject does not exist in the attendance tracker.");
+            }
+        }
+
+        function decrementAttendance(subjectName, subjectCode) {
+            const row = findAttendanceRow(subjectName, subjectCode);
+            if (row) {
+                const confirmation = confirm(`Bunk 1 class for ${subjectName} - ${subjectCode}?`);
+                if (confirmation) {
+                    const classesHeldInput = row.cells[2].querySelector('input');
+                    classesHeldInput.value = parseInt(classesHeldInput.value || '0') + 1;
+                    calculateAttendance(); // Recalculate attendance
+                }
+            } else {
+                alert("This subject does not exist in the attendance tracker.");
+            }
+        }
+
+
+        function calculateTotalAttendance() {
+            const rows = document.getElementById('attendanceTable').querySelectorAll('tbody tr');
+            let totalAttended = 0;
+            let totalHeld = 0;
+            rows.forEach(row => {
+                const classesHeld = parseInt(row.cells[2].querySelector('input').value) || 0;
+                const classesAttended = parseInt(row.cells[3].querySelector('input').value) || 0;
+                totalHeld += classesHeld;
+                totalAttended += classesAttended;
+            });
+            return totalHeld > 0 ? (totalAttended / totalHeld) * 100 : 0;
+        }
+
+        function updateAttendanceDisplay() {
+            const totalAttendance = calculateTotalAttendance();
+            document.getElementById('current-attendance').textContent = totalAttendance.toFixed(2);
+            checkAttendanceGoal(totalAttendance);
+        }
+
+        function setAttendanceGoal() {
+            const goal = parseFloat(document.getElementById('attendance-goal').value);
+            if (isNaN(goal)) {
+                alert("Please enter a valid attendance goal.");
+                return;
+            }
+            updateAttendanceDisplay(); // This will also check against the goal
+        }
+
+        function checkAttendanceGoal(totalAttendance) {
+            const goal = parseFloat(document.getElementById('attendance-goal').value);
+            const message = document.getElementById('attendance-message');
+            if (totalAttendance < goal) {
+                message.innerHTML = 'You bunked too many classes';
+                message.style.color = 'red';
+            } else if (totalAttendance > goal) {
+                message.innerHTML = 'You have good attendance';
+                message.style.color = 'green';
+            } else {
+                message.innerHTML = 'You have just enough attendance';
+                message.style.color = 'blue';
+            }
+
+            if (totalAttendance < 10) {
+                message.innerHTML = 'Happy NSAR';
+                message.style.color = 'red';
+            } else if (totalAttendance === 100) {
+                message.innerHTML = 'You are a nerd';
+                message.style.color = 'rgb(204, 153, 0)';
+            }
+        }
+
+        document.getElementById('addTaskBtn').addEventListener('click', function() {
+            const inputDiv = document.createElement('div'); // Create a div for the input
+            inputDiv.className = 'task-input-container'; // Assign a class for styling
+            
+            const taskInput = document.createElement('input'); // Create the input element
+            taskInput.type = 'text';
+            taskInput.className = 'task-input'; // Assign a class for styling
+            taskInput.placeholder = 'Enter a new task...';
+            
+            const addTaskBtn = document.createElement('button'); // Create a button to add the task
+            addTaskBtn.textContent = 'Add';
+            addTaskBtn.className = 'add-task-btn'; // Assign a class for styling
+            addTaskBtn.onclick = function() {
+                if (taskInput.value.trim() !== '') {
+                    addTask(taskInput.value); // Add the task
+                    inputDiv.remove(); // Remove the input box after adding the task
+                }
+            };
+            
+            inputDiv.appendChild(taskInput);
+            inputDiv.appendChild(addTaskBtn);
+            document.getElementById('todo-content').appendChild(inputDiv);
+            taskInput.focus(); // Focus on the new input
+        });
+
+
+        function addTask(text) {
+            const taskContainer = document.getElementById('tasksContainer');
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'task-container';
+
+            const taskText = document.createElement('div');
+            taskText.className = 'task';
+            taskText.textContent = text;
+
+            const completeBtn = document.createElement('button');
+            completeBtn.textContent = 'Complete';
+            completeBtn.className = 'complete-btn';
+            
+            // Event listener for marking as complete
+            completeBtn.addEventListener('click', function() {
+                taskText.style.textDecoration = 'line-through';
+            });
+
+            let holdTimeout;
+            completeBtn.addEventListener('mousedown', function() {
+                // Add the 'active' class to start the color change
+                completeBtn.classList.add('active');
+
+                // Set a timeout to remove the task after 2 seconds
+                holdTimeout = setTimeout(function() {
+                    taskContainer.removeChild(taskDiv);
+                }, 2000);
+            });
+
+            completeBtn.addEventListener('mouseup', function() {
+                // Remove the 'active' class and clear the timeout if the button is released
+                clearTimeout(holdTimeout);
+                completeBtn.classList.remove('active');
+            });
+
+            completeBtn.addEventListener('mouseleave', function() {
+                // Also remove the 'active' class and clear the timeout if the mouse leaves the button
+                clearTimeout(holdTimeout);
+                completeBtn.classList.remove('active');
+            });
+
+            taskDiv.appendChild(taskText);
+            taskDiv.appendChild(completeBtn);
+            taskContainer.appendChild(taskDiv);
+        }
+
+
+    </script>
+</body>
+</html>
