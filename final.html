@@ -798,12 +798,11 @@
                 selectedContent.style.display = 'block';
                 if (contentId === 'profile-customization') {
                     document.getElementById('profile-image').style.display = 'block';
-                    document.getElementById('profile-image').style.backgroundImage = "url('https://i.pinimg.com/736x/2e/0f/0f/2e0f0f479d54e96b0a249b618b9d2a0f.jpg')";
+                    document.getElementById('profile-image').style.backgroundImage = "url('https://assets-prd.ignimgs.com/2023/03/27/john-wick-keanu-reeves-more-films-1679912321709.jpeg')";
                     if (profileAttendanceContainer) profileAttendanceContainer.style.display = 'flex';
                 }
             }
         }
-
 
         function goToHomePage() {
             const allContent = document.querySelectorAll('.content');
@@ -812,8 +811,6 @@
             document.getElementById('profile-image').style.display = 'none'; 
             document.querySelector('.profile-attendance-container').style.display = 'none';
         }
-
-        
 
         function addSubject() {
             const subjectName = document.getElementById('subjectName').value;
@@ -961,17 +958,18 @@
                 if (!isNaN(classesHeld) && !isNaN(classesAttended) && !isNaN(minPercentage)) {
                     const currentPercentage = (classesAttended / classesHeld) * 100;
                     row.cells[5].innerText = currentPercentage.toFixed(2) + '%';
-                    let status = 0;
                     if (currentPercentage < minPercentage) {
+                        let status = 0;
                         while ((classesAttended + status) / (classesHeld + status) * 100 < minPercentage) {
                             status++;
                         }
-                        row.cells[6].innerHTML = '<span style="color: red;">-' + status + '</span>';
+                        row.cells[6].innerHTML = '<span style="color: red;">Need +' + status + ' classes</span>';
                     } else {
-                        while ((classesAttended - status) / (classesHeld - status) * 100 >= minPercentage && status < classesAttended) {
-                            status++;
+                        let extraClasses = 0; 
+                        while ((classesAttended / (classesHeld + extraClasses) * 100) >= minPercentage) {
+                            extraClasses++;
                         }
-                        row.cells[6].innerHTML = '<span style="color: green;">+' + (status - 1) + '</span>';
+                        row.cells[6].innerHTML = '<span style="color: green;">Can skip ' + (extraClasses - 1) + ' classes</span>';
                     }
                 } else {
                     row.cells[5].innerText = '';
@@ -979,6 +977,7 @@
                 }
             }
         }
+
 
         function addTimeSlot() {
             const timeSlot = document.getElementById('newTimeSlot').value.trim().toLowerCase();
