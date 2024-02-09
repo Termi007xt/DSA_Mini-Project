@@ -1,0 +1,29 @@
+function calculateAttendance() {
+            const table = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
+            for (let i = 0; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                const classesHeld = parseInt(row.cells[2].getElementsByTagName('input')[0].value);
+                const classesAttended = parseInt(row.cells[3].getElementsByTagName('input')[0].value);
+                const minPercentage = parseInt(row.cells[4].getElementsByTagName('input')[0].value);
+                if (!isNaN(classesHeld) && !isNaN(classesAttended) && !isNaN(minPercentage)) {
+                    const currentPercentage = (classesAttended / classesHeld) * 100;
+                    row.cells[5].innerText = currentPercentage.toFixed(2) + '%';
+                    if (currentPercentage < minPercentage) {
+                        let status = 0;
+                        while ((classesAttended + status) / (classesHeld + status) * 100 < minPercentage) {
+                            status++;
+                        }
+                        row.cells[6].innerHTML = '<span style="color: red;">Need +' + status + ' classes</span>';
+                    } else {
+                        let extraClasses = 0; 
+                        while ((classesAttended / (classesHeld + extraClasses) * 100) >= minPercentage) {
+                            extraClasses++;
+                        }
+                        row.cells[6].innerHTML = '<span style="color: green;">Can skip ' + (extraClasses - 1) + ' classes</span>';
+                    }
+                } else {
+                    row.cells[5].innerText = '';
+                    row.cells[6].innerText = '';
+                }
+            }
+        }
